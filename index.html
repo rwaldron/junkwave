@@ -4,7 +4,16 @@
     J U N K W A V E 
     A floating trash simulation for 5Gyres.com
     
-    Developer: Alistair MacDonald, @F1LT3R, http://hyper-metrix.com
+    Developer : Alistair MacDonald, @F1LT3R, http://hyper-metrix.com
+    License   : Liscenced to Brannan Novak & 5Gyres.org
+    Usage     : 
+    
+      1) Add JQuery and then junkwave.js to your document.
+      2) Create any number of DIVs with a classname of "junkwave".
+      3) Add 'global' to the classnames of junkwaves that you want to respond to
+         global mouse movement in the document. Local is default and will require
+         the mouse to be over the junkwave div before the junk pieces move.
+          
     
   -->
 
@@ -15,14 +24,18 @@
         width   : 400px;
         height  : 400px;
       }
+    #debug
+      {
+        border  : 1px solid red;
+        color   : red;
+      }
   </style>
 
   <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
   <script type="text/javascript" src="junkwave.js"></script>
 
-  <!-- Use the following to set up new Junkwaves -->
+  <!-- Use the following to set up new Junkwaves... -->
+  <div class="junkwave global"></div>
+
   
-  <div class="junkwave 02">
-  </div>
-
-
+  <div id="debug">debug</div>
