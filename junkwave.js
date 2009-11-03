@@ -18,8 +18,8 @@
   var defs = {
     imgPath           : "img/junkwave/", // Path to images
     imgResorceCount   : 4,     // Number of images available in imgPath. Up to 100, from: "junk_x[size][00].gif" to: "junk_x[size][99].gif"    
-    imgSize           : 64,
-    imgHalfSize       : 32,
+    imgSize           : 64,    // Size of images
+    imgHalfSize       : 32,    // Half size used to calculate bounds and origin offset
     junkCount         : 40,    // Number of pieces of junk floating around
     wave              : {      // Wave properties
                            count: 2, // 2 means 4 -> 1 = 1x & 1y, 2 = 2x & 2y. 2 waves contain 4 axes
@@ -103,33 +103,39 @@
 
       // Get the angle in radians from junk to the mouse
       var angle = Math.atan2( x2 - x1, y2 - y1 );      
-
-      // Decay or Attack radius if the mouse leaves or enters the DIV
-      if( !this.mouseOver ){
-        this.radius -= parseInt( this.radius ) > 0 ? this.radius / defs.radenv : 0 ;
-      }else{
-        this.radius += parseInt( this.radius ) < defs.radius ? defs.radius / defs.radenv : 0 ;
-      }
-      
+                       
       // Offset junk from the mouse position
       junk.realX = junk.originX + Math.sin( angle ) * this.radius;
       junk.realY = junk.originY + Math.cos( angle ) * this.radius;
-      
+
+            // Decay or Attack radius if the mouse leaves or enters the DIV
+            if( !this.mouseOver ){
+
+              // Affect the radius
+              this.radius -= parseInt( this.radius ) > 0 ? this.radius / defs.radenv : 0 ;
+
+            }else{
+              
+              // Affect the radius
+              this.radius += parseInt( this.radius ) < defs.radius ? defs.radius / defs.radenv : 0 ;
+
+              // Wave distortion of junk position
+              var wl = defs.wave.count;
+              for( var w = 0; w < wl; w++ ){
+                var wx = this.wave[ w ].x;
+                var wy = this.wave[ w ].y;
+                junk.realX += Math.sin( wx.freq + ( wx.phase * this.ticker ) ) * wx.amp;
+                junk.realY += Math.sin( wy.freq + ( wy.phase * this.ticker ) ) * wy.amp;
+              }
+              
+            }
+     
       // Clip the images to the bounds of the DIV
       if( junk.realX < defs.imgHalfSize ){ junk.realX = defs.imgHalfSize };
       if( junk.realY < defs.imgHalfSize ){ junk.realY = defs.imgHalfSize };
       if( junk.realX > this.width  - defs.imgHalfSize ){ junk.realX = this.width  - defs.imgHalfSize };
       if( junk.realY > this.height - defs.imgHalfSize ){ junk.realY = this.height - defs.imgHalfSize };
-
-      // Wave distortion of junk position
-      var wl = defs.wave.count;
-      for( var w = 0; w < wl; w++ ){
-        var wx = this.wave[ w ].x;
-        var wy = this.wave[ w ].y;
-        junk.realX += Math.sin( wx.freq + ( wx.phase * this.ticker ) ) * wx.amp;
-        junk.realY += Math.sin( wy.freq + ( wy.phase * this.ticker ) ) * wy.amp;
-      }
-      
+     
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
       junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
       junk.realY += ( junk.originY - junk.realY ) / defs.viscosity;
