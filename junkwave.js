@@ -29,7 +29,7 @@
                              amp: { min: 1  , max: 10  },
                            phase: { min: 0.1, max: 1.0 }
                         },
-    viscosity         : 2,     // Viscosity, LOW = Oil, HIGH = Water
+    viscosity         : 3,     // Viscosity, LOW = Oil, HIGH = Water
     radius            : 100,   // Radius of effect, ( how big a hand stirs the water )    
     radenv            : 500,   // Attack/Decay envelope speed of radius when mouse leaves DIV
     speed             : 30     // Speed of animation ( milliseconds per frame )
@@ -156,9 +156,9 @@
             }
      
       // Clip the images to the bounds of the DIV      
-      if( junk.realX < junk.halfWidth ){ junk.realX = junk.halfWidth };
+      if( junk.realX < junk.halfWidth  ){ junk.realX = junk.halfWidth  };
       if( junk.realY < junk.halfHeight ){ junk.realY = junk.halfHeight };
-      if( junk.realX > this.width  - junk.halfWidth ){ junk.realX = this.width  - junk.halfWidth };
+      if( junk.realX > this.width  - junk.halfWidth  ){ junk.realX = this.width - junk.halfWidth  };
       if( junk.realY > this.height - junk.halfHeight ){ junk.realY = this.height - junk.halfHeight };
      
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
@@ -197,7 +197,7 @@
     
     // Randomly generate some waves
     var l = defs.wave.count;
-    for( var i = 0; i < l; i++ ){      
+    for( var i = 0; i < l; i++ ){
       this.wave[ i ] = { x: randomize(), y: randomize() }
     }
     
@@ -215,10 +215,8 @@
       
       // Randomize an image for this piece'o-junk!
       var file = 'junk_';
-      var numb = nf( parseInt( ( Math.random() * 6 ) ), 2 );
+      var numb = nf( parseInt( ( Math.random() * (defs.imgResorceCount) ) ), 2 );
       junkImg.src = defs.imgPath + file + numb + '.gif';
-      
-     // console.log( junkImg.src );
 
       /* Set styles for the junk pieces:
             OriginX/Y           = the location the junk tries to return to
@@ -230,14 +228,14 @@
       junkImg.originY = Math.random() * ( this.height - defs.imgMaxSize ) + (defs.imgMaxSize/2);
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
-      junkImg.style.left = ( junkImg.realX - defs.imgHalfSize ) + 'px';
-      junkImg.style.top = ( junkImg.realY  - defs.imgHalfSize ) + 'px';
-                 
+      
       junkImg.onload = function(){
-        this.oWidth = this.width;
-        this.oHeight = this.height;
-        this.halfWidth = this.width / 2;
-        this.halfHeight = this.width / 2;
+        this.oWidth     = this.width;
+        this.oHeight    = this.height;
+        this.halfWidth  = this.width / 2;
+        this.halfHeight = this.height / 2;
+        this.style.left = ( this.realX - this.halfWidth ) + 'px';
+        this.style.top  = ( this.realY - this.halfHeight ) + 'px';
       }
       
       // Add new junk peice to div
