@@ -22,42 +22,39 @@
         border    : 1px solid black;
         width     : 300px;
         height    : 300px;
-        margin    : 20px;
-        padding   : 20px;
+        margin    : 10px;
+        padding   : 10px;
         text-align: center;
       }
-    #debug
-      {
-        border    : 1px solid red;
-        color     : red;
-      }
-    a:hover
-      {
-        background: #0af;
-        color     : #fff;        
-      }
+    #debug{border:1px solid red;color:red;}
+    a:hover{background: #0af;color:#fff;}
+    body{font-size:80%;font-family:Sans,Verdana;}
   </style>
 
   <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
   <script type="text/javascript" src="junkwave.js"></script>
 
-  <!-- Use the following to set up new Junkwaves... -->
-  <div class="junkwave global">    
-      <h3>Global Instance</h3>
-      <p>A <b>Global Instance</b> is always moving relative to the mouseX and mouseY of the document.</p>
-      <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
-      <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
-      <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
-      <a href="http://5gyres.org">5Gyres</a><br />
-  </div>
+  <div id="wrap">
 
-  <div class="junkwave">   
-      <h3>Local Instance</h3>
-      <p>A <b>Local Instance</b> only captures mouse events when the cursor is over the current element.</p>
-      <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
-      <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
-      <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
-      <a href="http://5gyres.org">5Gyres</a><br />
+      <!-- Use the following to set up new Junkwaves... -->
+      <div class="junkwave global">    
+          <h3>Global Instance</h3>
+          <p>A <b>Global Instance</b> is always moving relative to the mouseX and mouseY of the document.</p>
+          <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
+          <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
+          <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
+          <a href="http://5gyres.org">5Gyres</a><br />
+      </div>
+
+      <div class="junkwave">   
+          <h3>Local Instance</h3>
+          <p>A <b>Local Instance</b> only captures mouse events when the cursor is over the current element.</p>
+          <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
+          <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
+          <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
+          <a href="http://5gyres.org">5Gyres</a><br />
+      </div>
+  
   </div>
   
   <div id="debug">debug</div>
