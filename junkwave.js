@@ -21,13 +21,13 @@
     imgPath           : "img/junkwave/",
 
     // Number of images available in imgPath
-    imgResorceCount   : 4,
+    imgResorceCount   : 4, // Up to 100, from: "junk_x[size][00].gif" to: "junk_x[size][99].gif"
     
     imgSize           : 64,
     imgHalfSize       : 32,
 
     // Number of pieces of junk floating around
-    junkCount         : 25,
+    junkCount         : 40,
     
     // Wave properties
     wave              : { 
@@ -41,7 +41,7 @@
     viscosity         : 2,
     
     // Radius of effect, ( how big a hand stirs the water )
-    radius            : 80,
+    radius            : 100,
     
     // Speed of animation ( milliseconds per frame )
     speed             : 30
@@ -65,6 +65,7 @@
     this.elem.mouseY = 0;
     
     // Store internal properties
+    this.radius = defs.radius;
     this.type = type;
     this.width = w;
     this.height = h;
@@ -82,8 +83,10 @@
     var runframe  = function(){ backlink.frame() };
     var interval  = setInterval( runframe, defs.speed );
     
-    // Mouse move attachment
+    // Mouse attachments
+    this.mouseOver = false;
     bindMousemove.call( this, this.elem, this.mousemove );      
+    bindMouseout.call( this, this.elem, this.mouseout );
   }
 
 
@@ -109,14 +112,20 @@
 
       // Get the angle in radians from junk to the mouse
       var angle = Math.atan2( x2 - x1, y2 - y1 );      
-            
-      junk.realX = junk.originX + Math.sin( angle ) * defs.radius;
-      junk.realY = junk.originY + Math.cos( angle ) * defs.radius;
+
+      if( !this.mouseOver ){
+        this.radius -= this.radius / 500;
+      }else{
+        this.radius += this.radius < defs.radius ? defs.radius / 500 : 0 ;
+      }
+      
+      junk.realX = junk.originX + Math.sin( angle ) * this.radius;
+      junk.realY = junk.originY + Math.cos( angle ) * this.radius;
       
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
       junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
       junk.realY += ( junk.originY - junk.realY ) / defs.viscosity; 
-      
+           
       // Map co-ords to css properties
       junk.style.left = ( junk.realX - defs.imgHalfSize ) + 'px';
       junk.style.top = ( junk.realY - defs.imgHalfSize ) + 'px';
@@ -127,10 +136,13 @@
   
   // M O U S E - M O V E // ****************************************************
   Junkwave.prototype.mousemove = function mousemove( e ){
-    
-    /* ( e ) is fake... providing e.mouseX & e.mouseY  */
-    
+    this.mouseOver = true;
   }
+
+  // M O U S E - O U T // ****************************************************
+  Junkwave.prototype.mouseout = function mouseout( e ){
+    this.mouseOver = false;
+  }  
 
   // S E T - W A V E // ********************************************************
   Junkwave.prototype.setWave = function setWave(){
@@ -145,8 +157,10 @@
       // Make a new img element for the junk
       var junkImg = document.createElement( 'img' );
       
-      // Decide which image is used for this piece of junk
-      junkImg.src = defs.imgPath + 'junk_x'+ defs.imgSize +'_0'+ parseInt( ( Math.random() * 4 ) + 1 ) +'.gif';
+      // Randomize an image for this piece'o-junk!
+      var file = 'junk_x'+ defs.imgSize +'_';
+      var numb = nf( parseInt( ( Math.random() * 4 ) + 1 ), 2 );
+      junkImg.src = defs.imgPath + file + numb + '.gif';
 
       /* Set styles for the junk pieces:
             OriginX/Y       = the location the junk tries to return to
@@ -154,12 +168,12 @@
             style.left/top  = the css properties that map realX/Y */
       
       junkImg.style.position = 'absolute';
-      junkImg.originX = Math.random() * ( this.width - defs.imgSize );
-      junkImg.originY = Math.random() * ( this.width - defs.imgSize );
+      junkImg.originX = Math.random() * ( this.width - (defs.imgSize*2) ) + defs.imgHalfSize;
+      junkImg.originY = Math.random() * ( this.height - (defs.imgSize*2) ) + defs.imgHalfSize;
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
-      junkImg.style.left = ( junkImg.realX - 32 ) + 'px';
-      junkImg.style.top = ( junkImg.realY - 32 ) + 'px';
+      junkImg.style.left = ( junkImg.realX - defs.imgHalfSize ) + 'px';
+      junkImg.style.top = ( junkImg.realY  - defs.imgHalfSize ) + 'px';
       
       // Add new junk peice to div
       this.elem.appendChild( junkImg );
@@ -180,6 +194,13 @@
     return Math.sqrt( Math.pow( x2 - x1, 2 ) + Math.pow( y2 - y1, 2 ) );
   };
 
+  var nf = function nf( num, pad ){
+    var str = '' + num;
+    while( pad - str.length ){
+      str = '0' + str;
+    }
+    return str;
+  };
 
   
 
@@ -234,12 +255,21 @@
   var bindMousemove = function( elem, callback ){
     junkwaveInstance = this;
     $( elem ).mousemove( function( e ){
+        this.mouseOver = true;
         this.mouseX = e.pageX - this.offsetLeft;
         this.mouseY = e.pageY - this.offsetTop;
         callback ? callback.call( junkwaveInstance, { mouseX: this.mouseX, mouseY: this.mouseY } ) : 0 ;
     } );
   }
-  
+
+  var bindMouseout = function( elem, callback ){
+    junkwaveInstance = this;
+    $( elem ).mouseout( function( e ){
+        this.mouseOver = false;
+        callback ? callback.call( junkwaveInstance ) : 0 ;
+    } );
+  }
+ 
   var debug = function( output ){
     if( $.browser.mozilla ){
       console.log( output );
