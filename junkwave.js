@@ -65,7 +65,7 @@
     this.elem.mouseY = 0;
     
     // Store internal properties
-    this.radius = defs.radius;
+    this.radius = 0;
     this.type = type;
     this.width = w;
     this.height = h;
@@ -168,8 +168,8 @@
             style.left/top  = the css properties that map realX/Y */
       
       junkImg.style.position = 'absolute';
-      junkImg.originX = Math.random() * ( this.width - (defs.imgSize*2) ) + defs.imgHalfSize;
-      junkImg.originY = Math.random() * ( this.height - (defs.imgSize*2) ) + defs.imgHalfSize;
+      junkImg.originX = Math.random() * ( this.width - (defs.imgSize*2) ) + defs.imgSize;
+      junkImg.originY = Math.random() * ( this.height - (defs.imgSize*2) ) + defs.imgSize;
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
       junkImg.style.left = ( junkImg.realX - defs.imgHalfSize ) + 'px';

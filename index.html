@@ -19,15 +19,21 @@
   <style>
     .junkwave
       {
-        border  : 1px solid black;
-        width   : 400px;
-        height  : 400px;
-        margin  : 0 auto;
+        border    : 1px solid black;
+        width     : 300px;
+        height    : 300px;
+        margin    : 0 auto;
+        padding   : 20px;
       }
     #debug
       {
-        border  : 1px solid red;
-        color   : red;
+        border    : 1px solid red;
+        color     : red;
+      }
+    a:hover
+      {
+        background: #0af;
+        color     : #fff;
       }
   </style>
 
@@ -35,6 +41,13 @@
   <script type="text/javascript" src="junkwave.js"></script>
 
   <!-- Use the following to set up new Junkwaves... -->
-  <div class="junkwave global"></div>
+  <div class="junkwave global">
+    
+      <h3>DOM TEST ELEMENTS</h3>
+      <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
+      <a href="http://mozilla.org">Mozilla</a><br />
+      <a href="http://google.com">Google</a><br />
+      
+  </div>
   
   <div id="debug">debug</div>
