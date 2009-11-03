@@ -12,22 +12,22 @@
 (function(){
 
   //////////////////////////////////////////////////////////////////////////////
-  // GLOBAL SETTINGS
+  // GLOBAL defs
   //////////////////////////////////////////////////////////////////////////////
 
-  var settings = {
+  var defs = {
     
     // Path to images
     imgPath           : "img/junkwave/",
 
     // Number of images available in imgPath
-    imgResorceCount   : 1,
+    imgResorceCount   : 4,
     
     imgSize           : 64,
     imgHalfSize       : 32,
 
     // Number of pieces of junk floating around
-    junkCount         : 40,
+    junkCount         : 25,
     
     // Wave properties
     wave              : { 
@@ -38,7 +38,7 @@
                         },
     
     // Viscosity, LOW = Water-like, HIGH = Oil-esque
-    viscosity         : 8,
+    viscosity         : 2,
     
     // Radius of effect, ( how big a hand stirs the water )
     radius            : 80,
@@ -80,10 +80,10 @@
     // Frame step animation
     var backlink  = this;
     var runframe  = function(){ backlink.frame() };
-    var interval  = setInterval( runframe, settings.speed );
+    var interval  = setInterval( runframe, defs.speed );
     
     // Mouse move attachment
-    bindMousemove.call( this, this.elem, this.mousemove );
+    bindMousemove.call( this, this.elem, this.mousemove );      
   }
 
 
@@ -96,11 +96,11 @@
     for( var i = 0; i < l; i++ ){
 
       // Alias current junk for conveinence
-      var junk = this.junk[ i ];      
+      var junk = this.junk[ i ];
 
       // Simplify for positions for readability
-      var x1 = document.mouseX
-      var y1 = document.mouseY;
+      var x1 = this.elem.mouseX
+      var y1 = this.elem.mouseY;
       var x2 = junk.realX;
       var y2 = junk.realY;
       
@@ -110,16 +110,16 @@
       // Get the angle in radians from junk to the mouse
       var angle = Math.atan2( x2 - x1, y2 - y1 );      
             
-      junk.realX = junk.originX + Math.sin( angle ) * settings.radius;
-      junk.realY = junk.originY + Math.cos( angle ) * settings.radius;      
+      junk.realX = junk.originX + Math.sin( angle ) * defs.radius;
+      junk.realY = junk.originY + Math.cos( angle ) * defs.radius;
       
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
-      junk.realX += ( junk.originX - junk.realX ) / settings.viscosity;
-      junk.realY += ( junk.originY - junk.realY ) / settings.viscosity; 
+      junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
+      junk.realY += ( junk.originY - junk.realY ) / defs.viscosity; 
       
       // Map co-ords to css properties
-      junk.style.left = ( junk.realX - 32 ) + 'px';
-      junk.style.top = ( junk.realY - 32 ) + 'px';
+      junk.style.left = ( junk.realX - defs.imgHalfSize ) + 'px';
+      junk.style.top = ( junk.realY - defs.imgHalfSize ) + 'px';
 
     }
   
@@ -128,18 +128,7 @@
   // M O U S E - M O V E // ****************************************************
   Junkwave.prototype.mousemove = function mousemove( e ){
     
-    /* ( e ) is fake... providing e.mouseX & e.mouseY  */    
-    
-    // Step through junk array
-    var l = this.junk.length;
-    for( var i = 0; i < l; i++ ){
-      
-      // Alias current junk for conveinence
-      var junk = this.junk[ i ];
-
-    }
-    
-//    debug( e.mouseX + ', ' + e.mouseY );
+    /* ( e ) is fake... providing e.mouseX & e.mouseY  */
     
   }
 
@@ -151,13 +140,13 @@
   // A D D - J U N K // ********************************************************
   Junkwave.prototype.addJunk = function addJunk(){
     
-    for( var i = 0; i < settings.junkCount; i++ ){
+    for( var i = 0; i < defs.junkCount; i++ ){
       
       // Make a new img element for the junk
       var junkImg = document.createElement( 'img' );
       
       // Decide which image is used for this piece of junk
-      junkImg.src = settings.imgPath + 'junk_x64_01.gif';
+      junkImg.src = defs.imgPath + 'junk_x'+ defs.imgSize +'_0'+ parseInt( ( Math.random() * 4 ) + 1 ) +'.gif';
 
       /* Set styles for the junk pieces:
             OriginX/Y       = the location the junk tries to return to
@@ -165,8 +154,8 @@
             style.left/top  = the css properties that map realX/Y */
       
       junkImg.style.position = 'absolute';
-      junkImg.originX = Math.random() * ( this.width - settings.imgSize );
-      junkImg.originY = Math.random() * ( this.width - settings.imgSize );
+      junkImg.originX = Math.random() * ( this.width - defs.imgSize );
+      junkImg.originY = Math.random() * ( this.width - defs.imgSize );
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
       junkImg.style.left = ( junkImg.realX - 32 ) + 'px';
