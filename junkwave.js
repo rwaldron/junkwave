@@ -22,10 +22,10 @@
     imgHalfSize       : 32,
     junkCount         : 40,    // Number of pieces of junk floating around
     wave              : {      // Wave properties
-                           count: 2,
-                            freq: { min: 0.1, max: 10  },
-                             amp: { min: 0.1, max: 1   },
-                           phase: { min: 0.1, max: 0.4 }
+                           count: 2, // 2 means 4 -> 1 = 1x & 1y, 2 = 2x & 2y. 2 waves contain 4 axes
+                            freq: { min: 0.1, max: 5  },
+                             amp: { min: 1, max: 10   },
+                           phase: { min: 0.1, max: 1.0 }
                         },
     viscosity         : 2,     // Viscosity, LOW = Water-like, HIGH = Oil-esque    
     radius            : 100,   // Radius of effect, ( how big a hand stirs the water )    
@@ -53,12 +53,13 @@
     this.elem.mouseY = 0;
     
     // Store internal properties
-    this.radius = 0;
-    this.type = type;
-    this.width = w;
-    this.height = h;
-    this.centerX = w / 2;
-    this.centerY = h / 2;
+    this.radius   = 0;
+    this.type     = type;
+    this.width    = w;
+    this.height   = h;
+    this.ticker   = 0;
+    this.centerX  = w / 2;
+    this.centerY  = h / 2;
     
     // Build the junkwave
     this.junk = [];
@@ -72,7 +73,7 @@
     var interval  = setInterval( runframe, defs.speed );
     
     // Mouse attachments
-    this.mouseOver = false;
+    this.mouseOver = this.type == 'local' ? false : true ;
     bindMousemove.call( this, this.elem, this.mousemove );      
     bindMouseout.call( this, this.elem, this.mouseout );
   }
@@ -82,6 +83,8 @@
   // F R A M E - D O // ********************************************************
   Junkwave.prototype.frame = function frame(){
   
+    this.ticker += .1;
+    
     // Step through junk array
     var l = this.junk.length;
     for( var i = 0; i < l; i++ ){
@@ -90,8 +93,8 @@
       var junk = this.junk[ i ];
 
       // Simplify for positions for readability
-      var x1 = this.elem.mouseX
-      var y1 = this.elem.mouseY;
+      var x1 = this.type == 'local' ? this.elem.mouseX : document.mouseX - this.elem.offsetLeft ;
+      var y1 = this.type == 'local' ? this.elem.mouseY : document.mouseY - this.elem.offsetTop ;
       var x2 = junk.realX;
       var y2 = junk.realY;
       
@@ -117,11 +120,20 @@
       if( junk.realY < defs.imgHalfSize ){ junk.realY = defs.imgHalfSize };
       if( junk.realX > this.width  - defs.imgHalfSize ){ junk.realX = this.width  - defs.imgHalfSize };
       if( junk.realY > this.height - defs.imgHalfSize ){ junk.realY = this.height - defs.imgHalfSize };
+
+      // Wave distortion of junk position
+      var wl = defs.wave.count;
+      for( var w = 0; w < wl; w++ ){
+        var wx = this.wave[ w ].x;
+        var wy = this.wave[ w ].y;
+        junk.realX += Math.sin( wx.freq + ( wx.phase * this.ticker ) ) * wx.amp;
+        junk.realY += Math.sin( wy.freq + ( wy.phase * this.ticker ) ) * wy.amp;
+      }
       
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
       junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
-      junk.realY += ( junk.originY - junk.realY ) / defs.viscosity; 
-           
+      junk.realY += ( junk.originY - junk.realY ) / defs.viscosity;
+      
       // Map co-ords to css properties
       junk.style.left = ( junk.realX - defs.imgHalfSize ) + 'px';
       junk.style.top = ( junk.realY - defs.imgHalfSize ) + 'px';
@@ -137,12 +149,27 @@
 
   // M O U S E - O U T // ****************************************************
   Junkwave.prototype.mouseout = function mouseout( e ){
-    this.mouseOver = false;
+    // Mouse is alwas in 'over' state for a global instance, IE: mouse is 'over' the document
+    this.mouseOver = this.type == 'local' ? false : true ;
   }  
 
   // S E T - W A V E // ********************************************************
   Junkwave.prototype.setWave = function setWave(){
-  
+    
+    function randomize(){
+      return {
+        freq  : ( Math.random() * ( defs.wave.freq.max - defs.wave.freq.min ) ) + defs.wave.freq.min,
+        amp   : ( Math.random() * ( defs.wave.amp.max - defs.wave.amp.min ) ) + defs.wave.amp.min,
+        phase : ( Math.random() * ( defs.wave.phase.max - defs.wave.phase.min ) ) + defs.wave.phase.min
+      }
+    }
+    
+    // Randomly generate some waves
+    var l = defs.wave.count;
+    for( var i = 0; i < l; i++ ){      
+      this.wave[ i ] = { x: randomize(), y: randomize() }
+    }
+    
   }
     
   // A D D - J U N K // ********************************************************
@@ -254,7 +281,7 @@
         this.junkwave.mouseOver = true;
         this.mouseX = e.pageX - this.offsetLeft;
         this.mouseY = e.pageY - this.offsetTop;
-        callback ? callback.call( junkwaveInstance, { mouseX: this.mouseX, mouseY: this.mouseY } ) : 0 ;
+        callback ? callback.call( this.junkwave, { mouseX: this.mouseX, mouseY: this.mouseY } ) : 0 ;
     } );
   }
 
@@ -262,7 +289,7 @@
     junkwaveInstance = this;
     $( elem ).mouseout( function( e ){
         this.junkwave.mouseOver = false;
-        callback ? callback.call( junkwaveInstance ) : 0 ;
+        callback ? callback.call( this.junkwave ) : 0 ;
     } );
   }
  

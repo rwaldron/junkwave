@@ -22,8 +22,9 @@
         border    : 1px solid black;
         width     : 300px;
         height    : 300px;
-        margin    : 0 auto;
+        margin    : 20px;
         padding   : 20px;
+        text-align: center;
       }
     #debug
       {
@@ -33,7 +34,7 @@
     a:hover
       {
         background: #0af;
-        color     : #fff;
+        color     : #fff;        
       }
   </style>
 
@@ -41,22 +42,22 @@
   <script type="text/javascript" src="junkwave.js"></script>
 
   <!-- Use the following to set up new Junkwaves... -->
-  <div class="junkwave">
-    
-      <h3>TEST ELEMENTS</h3>
+  <div class="junkwave global">    
+      <h3>Global Instance</h3>
+      <p>A <b>Global Instance</b> is always moving relative to the mouseX and mouseY of the document.</p>
+      <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
       <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
-      <a href="http://mozilla.org">Mozilla</a><br />
-      <a href="http://google.com">Google</a><br />
-      
+      <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
+      <a href="http://5gyres.org">5Gyres</a><br />
   </div>
 
-  <div class="junkwave" style="width:400px">
-    
-      <h3>TEST ELEMENTS</h3>
+  <div class="junkwave">   
+      <h3>Local Instance</h3>
+      <p>A <b>Local Instance</b> only captures mouse events when the cursor is over the current element.</p>
+      <a href="http://twitter.com/brennannovak">Brennan Novak</a><br />
       <a href="http://hyper-metrix.com">Hyper-Metrix</a><br />
-      <a href="http://mozilla.org">Mozilla</a><br />
-      <a href="http://google.com">Google</a><br />
-      
+      <a href="http://twitter.com/f1lt3r">F1LT3R</a><br />     
+      <a href="http://5gyres.org">5Gyres</a><br />
   </div>
   
   <div id="debug">debug</div>
