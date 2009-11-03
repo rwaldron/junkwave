@@ -22,9 +22,12 @@
 
     // Number of images available in imgPath
     imgResorceCount   : 1,
+    
+    imgSize           : 64,
+    imgHalfSize       : 32,
 
     // Number of pieces of junk floating around
-    junkCount         : 20,
+    junkCount         : 40,
     
     // Wave properties
     wave              : { 
@@ -35,13 +38,13 @@
                         },
     
     // Viscosity, LOW = Water-like, HIGH = Oil-esque
-    viscosity         : 32,
+    viscosity         : 8,
     
     // Radius of effect, ( how big a hand stirs the water )
-    radius            : 50,
+    radius            : 80,
     
     // Speed of animation ( milliseconds per frame )
-    speed             : 30 
+    speed             : 30
     
   };
  
@@ -58,6 +61,8 @@
     this.elem = elem;
     this.elem.style.overflow = 'hidden';
     this.elem.style.position = 'relative';
+    this.elem.mouseX = 0;
+    this.elem.mouseY = 0;
     
     // Store internal properties
     this.type = type;
@@ -71,8 +76,7 @@
     this.addJunk();
     this.wave = [];
     this.setWave();
-    
-    
+        
     // Frame step animation
     var backlink  = this;
     var runframe  = function(){ backlink.frame() };
@@ -92,36 +96,51 @@
     for( var i = 0; i < l; i++ ){
 
       // Alias current junk for conveinence
-      var junk = this.junk[ i ];
+      var junk = this.junk[ i ];      
 
       // Simplify for positions for readability
-      var x1 = this.elem.mouseX;
-      var y1 = this.elem.mouseY;
-      var x2 = junk.style.originX;
-      var y2 = junk.style.originX;
+      var x1 = document.mouseX
+      var y1 = document.mouseY;
+      var x2 = junk.realX;
+      var y2 = junk.realY;
       
       // Get distance between junk and mouse
-      var distance = dist( x1, y1, x2, y2 );      
+      var distance = dist( x1, y1, x2, y2 );
+
+      // Get the angle in radians from junk to the mouse
+      var angle = Math.atan2( x2 - x1, y2 - y1 );      
+            
+      junk.realX = junk.originX + Math.sin( angle ) * settings.radius;
+      junk.realY = junk.originY + Math.cos( angle ) * settings.radius;      
       
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
       junk.realX += ( junk.originX - junk.realX ) / settings.viscosity;
       junk.realY += ( junk.originY - junk.realY ) / settings.viscosity; 
-            
+      
       // Map co-ords to css properties
-      junk.style.left = junk.realX + 'px';
-      junk.style.top = junk.realY + 'px';
+      junk.style.left = ( junk.realX - 32 ) + 'px';
+      junk.style.top = ( junk.realY - 32 ) + 'px';
 
     }
   
   }
   
   // M O U S E - M O V E // ****************************************************
-  Junkwave.prototype.mousemove = function mousemove( e ){  
+  Junkwave.prototype.mousemove = function mousemove( e ){
+    
+    /* ( e ) is fake... providing e.mouseX & e.mouseY  */    
+    
+    // Step through junk array
     var l = this.junk.length;
     for( var i = 0; i < l; i++ ){
-          var junk = this.junk[ i ];
-      junk.realX = this.elem.mouseX;
+      
+      // Alias current junk for conveinence
+      var junk = this.junk[ i ];
+
     }
+    
+//    debug( e.mouseX + ', ' + e.mouseY );
+    
   }
 
   // S E T - W A V E // ********************************************************
@@ -146,12 +165,12 @@
             style.left/top  = the css properties that map realX/Y */
       
       junkImg.style.position = 'absolute';
-      junkImg.originX = Math.random() * ( this.width - 64 );
-      junkImg.originY = Math.random() * ( this.width - 64 );
+      junkImg.originX = Math.random() * ( this.width - settings.imgSize );
+      junkImg.originY = Math.random() * ( this.width - settings.imgSize );
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
-      junkImg.style.left = junkImg.realX + 'px';
-      junkImg.style.top = junkImg.realY + 'px';
+      junkImg.style.left = ( junkImg.realX - 32 ) + 'px';
+      junkImg.style.top = ( junkImg.realY - 32 ) + 'px';
       
       // Add new junk peice to div
       this.elem.appendChild( junkImg );
@@ -170,7 +189,9 @@
   // Gets one objects distance from another
   var dist = function dist( x1, y1, x2, y2 ){
     return Math.sqrt( Math.pow( x2 - x1, 2 ) + Math.pow( y2 - y1, 2 ) );
-  }
+  };
+
+
   
 
 
@@ -205,6 +226,14 @@
 
     } );
     
+    // Add global mouse move
+    document.mouseX = 0;
+    document.mouseY = 0;
+    $( document ).mousemove( function( e ){
+        document.mouseX = e.pageX;
+        document.mouseY = e.pageY;
+    } );
+        
   };
   
   
