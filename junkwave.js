@@ -83,93 +83,105 @@
     bindMousemove.call( this, this.elem, this.mousemove );      
     bindMouseout.call( this, this.elem, this.mouseout );
     
+    this.awake = true;
+    
   }
 
 
 
   // F R A M E - D O // ********************************************************
   Junkwave.prototype.frame = function frame(){
-  
-    this.ticker += .1;
     
-    // Step through junk array
-    var l = this.junk.length;
-    for( var i = 0; i < l; i++ ){
-
-      // Alias current junk for conveinence
-      var junk = this.junk[ i ];
+    if( this.awake ){
+    
+      this.ticker += .1;
       
-      if( junk.ready ){
+      // Step through junk array
+      var l = this.junk.length;
+      for( var i = 0; i < l; i++ ){
 
-        // Simplify for positions for readability
-        var x1 = this.type == 'local' ? this.elem.mouseX : document.mouseX - this.elem.offsetLeft ;
-        var y1 = this.type == 'local' ? this.elem.mouseY : document.mouseY - this.elem.offsetTop ;
-        var x2 = junk.realX;
-        var y2 = junk.realY;
+        // Alias current junk for conveinence
+        var junk = this.junk[ i ];
         
-        // Get distance between junk and mouse
-        var distance = dist( x1, y1, x2, y2 );
+        if( junk.ready ){
 
-        // Get the angle in radians from junk to the mouse
-        var angle = Math.atan2( x2 - x1, y2 - y1 );
-        
-        // Offset junk from the mouse position
-        junk.realX = junk.originX + Math.sin( angle ) * this.radius;
-        junk.realY = junk.originY + Math.cos( angle ) * this.radius;
+          // Simplify for positions for readability
+          var x1 = this.type == 'local' ? this.elem.mouseX : document.mouseX - this.elem.offsetLeft ;
+          var y1 = this.type == 'local' ? this.elem.mouseY : document.mouseY - this.elem.offsetTop ;
+          var x2 = junk.realX;
+          var y2 = junk.realY;
+          
+          // Get distance between junk and mouse
+          var distance = dist( x1, y1, x2, y2 );
 
-        // Decay or Attack radius if the mouse leaves or enters the DIV
-        if( !this.mouseOver ){
-          // Affect the radius
-          this.radius -= parseInt( this.radius ) > 0 ? this.radius / defs.radenv : 0 ;
-        }else{        
-          // Affect the radius
-          this.radius += parseInt( this.radius ) < defs.radius ? defs.radius / defs.radenv : 0 ;
-          // Wave distortion of junk position ( disiabled for IE due to painfuly slow image resizing )
-          if( !$.browser.msie && defs.wave.zAmp ){
-            var wl = defs.wave.count;
-            for( var w = 0; w < wl; w++ ){            
-              // Alias wave axes
-              var wx = this.wave[ w ].x;
-              var wy = this.wave[ w ].y;            
-              // Distort position with wave
-              junk.realX += Math.sin( wx.freq + ( wx.phase * this.ticker ) ) * wx.amp;
-              junk.realY += Math.cos( wy.freq + ( wy.phase * this.ticker ) ) * wy.amp;                                              
-              // Webkit can't resize an image decimally
-              var zBob = Math.cos( this.ticker + ( junk.originX / this.halfWidth ) ) * defs.wave.zAmp;            
-              // Make sure img never gets larger than it's origin
-              zBob = defs.wave.doubleZAmp + zBob;            
-              // Webkit can't resize an image decimally so parseInt()
-              if( $.browser.webkit ){ zBob = parseInt( zBob ) };
-              // Apply Z bob distortion
-              junk.width = junk.oWidth - zBob;
-              junk.width = junk.oWidth - zBob;
+          // Get the angle in radians from junk to the mouse
+          var angle = Math.atan2( x2 - x1, y2 - y1 );
+          
+          // Offset junk from the mouse position
+          junk.realX = junk.originX + Math.sin( angle ) * this.radius;
+          junk.realY = junk.originY + Math.cos( angle ) * this.radius;
+
+          // Decay or Attack radius if the mouse leaves or enters the DIV
+          if( !this.mouseOver ){
+            // Affect the radius
+            this.radius -= parseInt( this.radius ) > 0 ? this.radius / defs.radenv : 0 ;            
+            // Go to sleep and stop taking CPU until mouse comes back
+            if( this.radius < 1 ){
+              this.radius = 0;
+              this.awake = false;
+            };
+          }else{        
+            // Affect the radius
+            this.radius += parseInt( this.radius ) < defs.radius ? defs.radius / defs.radenv : 0 ;
+            // Wave distortion of junk position ( disiabled for IE due to painfuly slow image resizing )
+            if( !$.browser.msie && defs.wave.zAmp ){
+              var wl = defs.wave.count;
+              for( var w = 0; w < wl; w++ ){            
+                // Alias wave axes
+                var wx = this.wave[ w ].x;
+                var wy = this.wave[ w ].y;            
+                // Distort position with wave
+                junk.realX += Math.sin( wx.freq + ( wx.phase * this.ticker ) ) * wx.amp;
+                junk.realY += Math.cos( wy.freq + ( wy.phase * this.ticker ) ) * wy.amp;                                              
+                // Webkit can't resize an image decimally
+                var zBob = Math.cos( this.ticker + ( junk.originX / this.halfWidth ) ) * defs.wave.zAmp;            
+                // Make sure img never gets larger than it's origin
+                zBob = defs.wave.doubleZAmp + zBob;            
+                // Webkit can't resize an image decimally so parseInt()
+                if( $.browser.webkit ){ zBob = parseInt( zBob ) };
+                // Apply Z bob distortion
+                junk.width = junk.oWidth - zBob;
+                junk.width = junk.oWidth - zBob;
+              }
             }
           }
-        }
-       
-        // Clip the images to the bounds of the DIV      
-        if( junk.realX < junk.halfWidth  ){ junk.realX = junk.halfWidth  };
-        if( junk.realY < junk.halfHeight ){ junk.realY = junk.halfHeight };
-        if( junk.realX > this.width  - junk.halfWidth  ){ junk.realX = this.width - junk.halfWidth  };
-        if( junk.realY > this.height - junk.halfHeight ){ junk.realY = this.height - junk.halfHeight };
-       
-        // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
-        junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
-        junk.realY += ( junk.originY - junk.realY ) / defs.viscosity;
+         
+          // Clip the images to the bounds of the DIV      
+          if( junk.realX < junk.halfWidth  ){ junk.realX = junk.halfWidth  };
+          if( junk.realY < junk.halfHeight ){ junk.realY = junk.halfHeight };
+          if( junk.realX > this.width  - junk.halfWidth  ){ junk.realX = this.width - junk.halfWidth  };
+          if( junk.realY > this.height - junk.halfHeight ){ junk.realY = this.height - junk.halfHeight };
+         
+          // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
+          junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
+          junk.realY += ( junk.originY - junk.realY ) / defs.viscosity;
+          
+          // Map co-ords to css properties
+          junk.style.left = ( junk.realX - junk.halfWidth ) + 'px';
+          junk.style.top = ( junk.realY - junk.halfHeight ) + 'px';
         
-        // Map co-ords to css properties
-        junk.style.left = ( junk.realX - junk.halfWidth ) + 'px';
-        junk.style.top = ( junk.realY - junk.halfHeight ) + 'px';
+        }
       
       }
-    
+
     }
-  
+      
   }
   
   // M O U S E - M O V E // ****************************************************
   Junkwave.prototype.mousemove = function mousemove( e ){
     this.mouseOver = true;
+    this.awake = true;
   }
 
   // M O U S E - O U T // ****************************************************
