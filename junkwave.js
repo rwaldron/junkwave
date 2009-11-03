@@ -12,40 +12,25 @@
 (function(){
 
   //////////////////////////////////////////////////////////////////////////////
-  // GLOBAL defs
+  // GLOBAL DEFAULTS
   //////////////////////////////////////////////////////////////////////////////
 
   var defs = {
-    
-    // Path to images
-    imgPath           : "img/junkwave/",
-
-    // Number of images available in imgPath
-    imgResorceCount   : 4, // Up to 100, from: "junk_x[size][00].gif" to: "junk_x[size][99].gif"
-    
+    imgPath           : "img/junkwave/", // Path to images
+    imgResorceCount   : 4,     // Number of images available in imgPath. Up to 100, from: "junk_x[size][00].gif" to: "junk_x[size][99].gif"    
     imgSize           : 64,
     imgHalfSize       : 32,
-
-    // Number of pieces of junk floating around
-    junkCount         : 40,
-    
-    // Wave properties
-    wave              : { 
+    junkCount         : 40,    // Number of pieces of junk floating around
+    wave              : {      // Wave properties
                            count: 2,
                             freq: { min: 0.1, max: 10  },
                              amp: { min: 0.1, max: 1   },
                            phase: { min: 0.1, max: 0.4 }
                         },
-    
-    // Viscosity, LOW = Water-like, HIGH = Oil-esque
-    viscosity         : 2,
-    
-    // Radius of effect, ( how big a hand stirs the water )
-    radius            : 100,
-    
-    // Speed of animation ( milliseconds per frame )
-    speed             : 30
-    
+    viscosity         : 2,     // Viscosity, LOW = Water-like, HIGH = Oil-esque    
+    radius            : 100,   // Radius of effect, ( how big a hand stirs the water )    
+    radenv            : 500,   // Attack/Decay envelope speed of radius when mouse leaves DIV
+    speed             : 30     // Speed of animation ( milliseconds per frame )
   };
  
 
@@ -56,7 +41,10 @@
 
   // The Junkwave porototype object
   function Junkwave( elem, type, w, h ){
-
+  
+    this.id = 'JunkWave_' + nf( instances.length, 2 );
+    elem.junkwave = this;
+    
     // Set up the .junkwave DIV element
     this.elem = elem;
     this.elem.style.overflow = 'hidden';
@@ -113,14 +101,22 @@
       // Get the angle in radians from junk to the mouse
       var angle = Math.atan2( x2 - x1, y2 - y1 );      
 
+      // Decay or Attack radius if the mouse leaves or enters the DIV
       if( !this.mouseOver ){
-        this.radius -= this.radius / 500;
+        this.radius -= parseInt( this.radius ) > 0 ? this.radius / defs.radenv : 0 ;
       }else{
-        this.radius += this.radius < defs.radius ? defs.radius / 500 : 0 ;
+        this.radius += parseInt( this.radius ) < defs.radius ? defs.radius / defs.radenv : 0 ;
       }
       
+      // Offset junk from the mouse position
       junk.realX = junk.originX + Math.sin( angle ) * this.radius;
       junk.realY = junk.originY + Math.cos( angle ) * this.radius;
+      
+      // Clip the images to the bounds of the DIV
+      if( junk.realX < defs.imgHalfSize ){ junk.realX = defs.imgHalfSize };
+      if( junk.realY < defs.imgHalfSize ){ junk.realY = defs.imgHalfSize };
+      if( junk.realX > this.width  - defs.imgHalfSize ){ junk.realX = this.width  - defs.imgHalfSize };
+      if( junk.realY > this.height - defs.imgHalfSize ){ junk.realY = this.height - defs.imgHalfSize };
       
       // Junk tries to return to it's origin but is offset by human interaction, ah the patterns of life! ;)
       junk.realX += ( junk.originX - junk.realX ) / defs.viscosity;
@@ -163,13 +159,13 @@
       junkImg.src = defs.imgPath + file + numb + '.gif';
 
       /* Set styles for the junk pieces:
-            OriginX/Y       = the location the junk tries to return to
+            OriginX/Y           = the location the junk tries to return to
             realX/Y             = the current displaced x/y position
-            style.left/top  = the css properties that map realX/Y */
+            style.left/top      = the css properties that map realX/Y */
       
       junkImg.style.position = 'absolute';
-      junkImg.originX = Math.random() * ( this.width - (defs.imgSize*2) ) + defs.imgSize;
-      junkImg.originY = Math.random() * ( this.height - (defs.imgSize*2) ) + defs.imgSize;
+      junkImg.originX = Math.random() * ( this.width - defs.imgSize ) + defs.imgHalfSize;
+      junkImg.originY = Math.random() * ( this.height - defs.imgSize ) + defs.imgHalfSize;
       junkImg.realX = junkImg.originX;
       junkImg.realY = junkImg.originY;
       junkImg.style.left = ( junkImg.realX - defs.imgHalfSize ) + 'px';
@@ -219,10 +215,10 @@
   // Main init function that builds the waves
   function init_junkwave(){
      
-    $( 'div.junkwave' ).each( function(){
-              
-      var w = $( this ).width();
-      var h = $( this ).height();
+    $( 'div.junkwave' ).each( function(){    
+    
+      var w = $( this ).outerWidth();
+      var h = $( this ).outerHeight();
       var type = 'local';
       
       var classes = $( this ).attr( 'class' ).split( ' ' );
@@ -255,7 +251,7 @@
   var bindMousemove = function( elem, callback ){
     junkwaveInstance = this;
     $( elem ).mousemove( function( e ){
-        this.mouseOver = true;
+        this.junkwave.mouseOver = true;
         this.mouseX = e.pageX - this.offsetLeft;
         this.mouseY = e.pageY - this.offsetTop;
         callback ? callback.call( junkwaveInstance, { mouseX: this.mouseX, mouseY: this.mouseY } ) : 0 ;
@@ -265,7 +261,7 @@
   var bindMouseout = function( elem, callback ){
     junkwaveInstance = this;
     $( elem ).mouseout( function( e ){
-        this.mouseOver = false;
+        this.junkwave.mouseOver = false;
         callback ? callback.call( junkwaveInstance ) : 0 ;
     } );
   }
@@ -280,20 +276,3 @@
   
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
